@@ -1,0 +1,48 @@
+[project]
+name = "litestar-geoalchemy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "cemrehancavdar", email = "50503448+cemrehancavdar@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "geoalchemy2>=0.18.0",
+    "litestar>=2.18.0",
+    "pytest>=9.0.1",
+    "shapely>=2.1.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.5",
+]
+
+[tool.ruff]
+line-length = 120
+src = ["src"]
+target-version = "py310"
+
+
+[tool.ruff.lint]
+select = ["ALL"]
+fixable = ["ALL"]
+preview = true
+ignore = [
+    "PLR",
+    "D",
+    "ANN003",
+    "ANN002",
+    "ANN201",
+    "ANN204",
+    "CPY",
+    "DOC",
+    "RUF052",
+    "COM812",
+]
+
