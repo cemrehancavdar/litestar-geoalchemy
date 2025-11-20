@@ -10,7 +10,6 @@ requires-python = ">=3.10"
 dependencies = [
     "geoalchemy2>=0.18.0",
     "litestar>=2.18.0",
-    "pytest>=9.0.1",
     "shapely>=2.1.2",
 ]
 
@@ -20,6 +19,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pytest>=9.0.1",
     "ruff>=0.14.5",
 ]
 
