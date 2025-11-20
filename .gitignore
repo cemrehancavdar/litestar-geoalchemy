@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .vscode/
+.ruff_cache/
+.mypy_cache/
+.nox/
+.pytest_cache/
