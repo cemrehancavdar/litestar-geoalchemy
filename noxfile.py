@@ -6,7 +6,10 @@ options.default_venv_backend = "uv"
 
 PYTHON_VERSIONS = [
     "3.10",
-    "3.11"
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14",
 ]
 
 LITESTAR_VERSIONS = ["2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "latest"]
