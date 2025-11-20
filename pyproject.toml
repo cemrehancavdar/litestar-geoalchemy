@@ -8,9 +8,9 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "geoalchemy2>=0.18.0",
-    "litestar>=2.18.0",
-    "shapely>=2.1.2",
+    "geoalchemy2>=0.16.0",
+    "litestar>=2.0",
+    "shapely>=2.0.0",
 ]
 
 [build-system]
@@ -19,6 +19,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "nox>=2025.11.12",
+    "nox-uv>=0.6.3",
     "pytest>=9.0.1",
     "ruff>=0.14.5",
 ]
