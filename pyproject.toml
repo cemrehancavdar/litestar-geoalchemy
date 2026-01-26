@@ -1,13 +1,12 @@
 [project]
 name = "litestar-geoalchemy"
-version = "0.2.0"
+version = "0.2.1"
 description = "Litestar plugin for GeoAlchemy2 - seamless GeoJSON serialization with PostGIS"
 readme = "README.md"
 license = "MIT"
 keywords = ["litestar", "geoalchemy2", "geojson", "postgis", "gis", "spatial"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Framework :: Litestar",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
