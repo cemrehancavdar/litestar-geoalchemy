@@ -4,13 +4,24 @@ Supports all GeoJSON types per RFC 7946:
 - Geometry: Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection
 - Feature: geometry + properties
 - FeatureCollection: array of features
+
+Works for both:
+- SQLAlchemy column types (Point, Polygon, etc.) via DTO/dataclass routes
+- Pydantic Geo* types (GeoPoint, GeoPolygon, etc.) via service/repository routes
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from geoalchemy2 import Geometry
-from litestar._openapi.schema_generation import SchemaCreator
+from geoalchemy2.types import WKBElement  # pyright: ignore[reportPrivateImportUsage]
 from litestar.openapi.spec import OpenAPIType, Schema
 from litestar.plugins import OpenAPISchemaPlugin
-from litestar.typing import FieldDefinition
+
+if TYPE_CHECKING:
+    from litestar._openapi.schema_generation import SchemaCreator
+    from litestar.typing import FieldDefinition
 
 from .types import (
     AnyGeometry,
@@ -248,10 +259,40 @@ def _schema_with_feature_input(geometry_schema: Schema) -> Schema:
 # =============================================================================
 
 
+def _get_geojson_meta(field_definition: FieldDefinition) -> Any | None:  # noqa: ANN401
+    """Extract GeoJSONMeta from Annotated metadata if present.
+
+    Returns the GeoJSONMeta instance or None.
+    Avoids importing pydantic module (which is optional).
+    """
+    for meta in field_definition.metadata:
+        if type(meta).__name__ == "GeoJSONMeta" and hasattr(meta, "geojson_type"):
+            return meta
+    return None
+
+
+# Map GeoJSON type strings to OpenAPI schemas (for Pydantic Geo* types)
+GEOJSON_TYPE_TO_SCHEMA: dict[str, Schema] = {
+    "Point": point_schema,
+    "LineString": line_string_schema,
+    "Polygon": polygon_schema,
+    "MultiPoint": multipoint_schema,
+    "MultiLineString": multilinestring_schema,
+    "MultiPolygon": multipolygon_schema,
+    "GeometryCollection": geometry_collection_schema,
+}
+
+
 class GeoalchemySchemaPlugin(OpenAPISchemaPlugin):
     @staticmethod
-    def is_plugin_supported_type(value) -> bool:  # noqa: ANN001
-        return value in SUPPORTED_TYPES
+    def is_plugin_supported_type(value: Any) -> bool:  # noqa: ANN401
+        if value in SUPPORTED_TYPES:
+            return True
+        # Also handle WKBElement (base type for Geo* Annotated types)
+        try:
+            return isinstance(value, type) and issubclass(value, WKBElement)
+        except TypeError:
+            return False
 
     def to_openapi_schema(
         self,
@@ -260,13 +301,25 @@ class GeoalchemySchemaPlugin(OpenAPISchemaPlugin):
     ) -> Schema:
         annotation = field_definition.annotation
 
+        # Check for Pydantic Geo* types (WKBElement with GeoJSONMeta)
+        geo_meta = _get_geojson_meta(field_definition)
+        if geo_meta is not None:
+            geojson_type = geo_meta.geojson_type
+            if geojson_type in GEOJSON_TYPE_TO_SCHEMA:
+                return GEOJSON_TYPE_TO_SCHEMA[geojson_type]
+            return any_geometry_schema
+
         # Generic Geometry or AnyGeometry: accept any geometry type + Feature wrappers
         if annotation in (Geometry, AnyGeometry):
             return _schema_with_feature_input(any_geometry_schema)
 
-        # Specific geometry type
+        # Specific geometry type (SQLAlchemy column types)
         if annotation in TYPE_TO_SCHEMA:
             return _schema_with_feature_input(TYPE_TO_SCHEMA[annotation])
+
+        # Bare WKBElement: any geometry
+        if isinstance(annotation, type) and issubclass(annotation, WKBElement):
+            return any_geometry_schema
 
         msg = f"Unsupported type {annotation}"
         raise ValueError(msg)

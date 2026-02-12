@@ -1,6 +1,6 @@
 [project]
 name = "litestar-geoalchemy"
-version = "0.2.1"
+version = "0.3.0"
 description = "Litestar plugin for GeoAlchemy2 - seamless GeoJSON serialization with PostGIS"
 readme = "README.md"
 license = "MIT"
@@ -14,6 +14,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Database",
     "Topic :: Scientific/Engineering :: GIS",
 ]
@@ -27,6 +28,9 @@ dependencies = [
     "shapely>=2.0.0",
 ]
 
+[project.optional-dependencies]
+pydantic = ["pydantic>=2.0", "pydantic-geojson>=0.3.0"]
+
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]
 build-backend = "uv_build"
@@ -34,9 +38,10 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "aiosqlite>=0.22.1",
-    "alembic>=1.18.1",
+
     "asyncpg>=0.31.0",
     "greenlet>=3.2.4",
+    "litestar-geoalchemy[pydantic]",
     "nox>=2025.11.12",
     "nox-uv>=0.6.3",
     "psycopg>=3.3.2",
@@ -70,3 +75,6 @@ ignore = [
     "COM812",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"demo/*" = ["S106", "EM102", "TRY003", "TC001", "TC002", "TC003", "RUF029"]
+"tests/*" = ["S101"]
