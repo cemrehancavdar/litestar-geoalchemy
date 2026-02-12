@@ -19,7 +19,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
 from advanced_alchemy.extensions.litestar import SQLAlchemyDTO, SQLAlchemyDTOConfig
-from geoalchemy2 import Geometry
 from geoalchemy2.shape import from_shape
 from litestar import Litestar, get, post
 from litestar.datastructures import State
@@ -27,46 +26,13 @@ from litestar.exceptions import NotFoundException
 from shapely import MultiPolygon as ShapelyMultiPolygon
 from shapely import Point as ShapelyPoint
 from shapely import Polygon as ShapelyPolygon
-from sqlalchemy import Integer, String, func, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from testcontainers.postgres import PostgresContainer
 
+from demo.models import Base, City as CityModel, Park as ParkModel, Region as RegionModel
 from litestar_geoalchemy import GeoAlchemyPlugin
-from litestar_geoalchemy.types import MultiPolygon, Point, Polygon
-
-# =============================================================================
-# Database Models
-# =============================================================================
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-class CityModel(Base):
-    __tablename__ = "cities"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    location: Mapped[Point] = mapped_column(Geometry("POINT"), nullable=False)  # type: ignore[assignment]
-
-
-class ParkModel(Base):
-    __tablename__ = "parks"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    boundary: Mapped[Polygon] = mapped_column(Geometry("POLYGON"), nullable=False)  # type: ignore[assignment]
-
-
-class RegionModel(Base):
-    __tablename__ = "regions"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    area: Mapped[MultiPolygon] = mapped_column(Geometry("MULTIPOLYGON"), nullable=False)  # type: ignore[assignment]
-
+from litestar_geoalchemy.types import Point
 
 # =============================================================================
 # DTOs - SQLAlchemyDTO handles serialization automatically
